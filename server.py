@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import threading
 import time
@@ -71,6 +72,21 @@ def parse_compact_number(text: str) -> int | None:
 
 
 def fetch_telegram() -> int | None:
+    token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+    if token:
+        try:
+            raw = fetch_text(
+                "https://api.telegram.org/bot"
+                + token
+                + "/getChatMemberCount?chat_id=@acrotim"
+            )
+            payload = json.loads(raw)
+            result = payload.get("result")
+            if payload.get("ok") and isinstance(result, int):
+                return result
+        except Exception:
+            return None
+        return None
     html = fetch_text("https://t.me/acrotim")
     match = re.search(r"tgme_page_extra[^>]*>(.*?)</div>", html, re.S)
     if not match:

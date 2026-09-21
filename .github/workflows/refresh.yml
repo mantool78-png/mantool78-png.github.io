@@ -26,15 +26,12 @@ jobs:
       - name: Снять цифры
         env:
           TZ: Asia/Yekaterinburg
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: python collect.py
       - name: Сохранить цифры
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/history.json stats.json
-          if git diff --staged --quiet; then
-            echo "Цифры не изменились"
-          else
-            git commit -m "Обновить цифры подписчиков"
-            git push
-          fi
+          git diff --staged --quiet || git commit -m "Обновить цифры подписчиков"
+          git push
