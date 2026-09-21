@@ -134,7 +134,7 @@ function apply(data) {
 }
 
 async function refresh() {
-  const response = await fetch("stats.json", { cache: "no-store" });
+  const response = await fetch(`stats.json?t=${Date.now()}`, { cache: "no-store" });
   if (!response.ok) return;
   apply(await response.json());
 }
