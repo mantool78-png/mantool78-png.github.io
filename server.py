@@ -66,7 +66,7 @@ def parse_compact_number(text: str) -> int | None:
         return None
     number = float(match.group(1).replace(",", "."))
     unit = (match.group(2) or "").lower()
-    multiplier = {"": : 1, "тыс": 1_000, "млн": 1_000_000, "млрд": 1_000_000_000}
+    multiplier = {"": 1, "тыс": 1_000, "млн": 1_000_000, "млрд": 1_000_000_000}
     return int(number * multiplier[unit])
 
 
