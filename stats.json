@@ -11,29 +11,29 @@
     },
     {
       "id": "youtube",
-      "count": 208,
-      "delta": 0,
+      "count": 209,
+      "delta": 1,
       "series": [
         208,
-        208
+        209
       ]
     },
     {
       "id": "vk",
-      "count": 10449,
-      "delta": 7,
+      "count": 10461,
+      "delta": 19,
       "series": [
         10442,
-        10449
+        10461
       ]
     },
     {
       "id": "tiktok",
-      "count": 145,
-      "delta": 0,
+      "count": 147,
+      "delta": 2,
       "series": [
         145,
-        145
+        147
       ]
     },
     {
@@ -47,10 +47,10 @@
     },
     {
       "id": "max",
-      "count": 369,
+      "count": 370,
       "delta": null,
       "series": [
-        369
+        370
       ]
     }
   ]
