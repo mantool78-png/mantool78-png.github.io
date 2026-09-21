@@ -1,1 +1,57 @@
-{"networks": [{"id": "telegram", "count": 6589, "delta": 0, "series": [6589, 6589]}, {"id": "youtube", "count": 208, "delta": 0, "series": [208, 208]}, {"id": "vk", "count": 10444, "delta": 2, "series": [10442, 10444]}, {"id": "tiktok", "count": 145, "delta": 0, "series": [145, 145]}, {"id": "dzen", "count": 130, "delta": 0, "series": [130, 130]}, {"id": "max", "count": 369, "delta": null, "series": [369]}]}
+{
+  "networks": [
+    {
+      "id": "telegram",
+      "count": 6589,
+      "delta": 0,
+      "series": [
+        6589,
+        6589
+      ]
+    },
+    {
+      "id": "youtube",
+      "count": 208,
+      "delta": 0,
+      "series": [
+        208,
+        208
+      ]
+    },
+    {
+      "id": "vk",
+      "count": 10448,
+      "delta": 6,
+      "series": [
+        10442,
+        10448
+      ]
+    },
+    {
+      "id": "tiktok",
+      "count": 145,
+      "delta": 0,
+      "series": [
+        145,
+        145
+      ]
+    },
+    {
+      "id": "dzen",
+      "count": 130,
+      "delta": 0,
+      "series": [
+        130,
+        130
+      ]
+    },
+    {
+      "id": "max",
+      "count": 369,
+      "delta": null,
+      "series": [
+        369
+      ]
+    }
+  ]
+}
