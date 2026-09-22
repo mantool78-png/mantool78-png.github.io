@@ -35,6 +35,7 @@ const format = new Intl.NumberFormat("ru-RU");
 const grid = document.getElementById("grid");
 const totalEl = document.getElementById("total");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const shown = new Map();
 
 function mountCards() {
   grid.innerHTML = NETWORKS.map((network, index) => `
@@ -46,29 +47,55 @@ function mountCards() {
       <div class="count">—</div>
       <div class="delta"></div>
       <svg class="spark empty" viewBox="0 0 160 36" preserveAspectRatio="none" aria-hidden="true">
-        <path d=""></path>
+        <defs>
+          <linearGradient id="spark-grad-${network.id}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.32"/>
+            <stop offset="100%" stop-color="var(--accent)" stop-opacity="0.0"/>
+          </linearGradient>
+        </defs>
+        <path class="spark-area" fill="url(#spark-grad-${network.id})" d=""></path>
+        <path class="spark-line" d=""></path>
+        <circle class="spark-dot" r="2.5" cx="-10" cy="-10"></circle>
       </svg>
     </article>
   `).join("");
 }
 
-function linePath(series) {
+function sparkPaths(series) {
   const width = 160;
   const height = 36;
   if (!series.length) {
-    return `M 0 ${height / 2} L ${width} ${height / 2}`;
+    const y = height / 2;
+    return {
+      line: `M 0 ${y} L ${width} ${y}`,
+      area: `M 0 ${y} L ${width} ${y} L ${width} ${height} L 0 ${height} Z`,
+      dot: { x: width, y, visible: false },
+    };
   }
   if (series.length === 1) {
-    return `M 0 ${height / 2} L ${width} ${height / 2}`;
+    const y = height / 2;
+    return {
+      line: `M 0 ${y} L ${width} ${y}`,
+      area: `M 0 ${y} L ${width} ${y} L ${width} ${height} L 0 ${height} Z`,
+      dot: { x: width, y, visible: true },
+    };
   }
   const min = Math.min(...series);
   const max = Math.max(...series);
   const span = max - min || 1;
-  return series.map((value, index) => {
+  const points = series.map((value, index) => {
     const x = (index / (series.length - 1)) * width;
-    const y = height - 3 - ((value - min) / span) * (height - 6);
-    return `${index === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`;
-  }).join(" ");
+    const y = height - 4 - ((value - min) / span) * (height - 8);
+    return { x, y };
+  });
+  const line = points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ");
+  const last = points[points.length - 1];
+  const area = `${line} L ${width} ${height} L 0 ${height} Z`;
+  return {
+    line,
+    area,
+    dot: { x: last.x, y: last.y, visible: true },
+  };
 }
 
 function paintNumber(element, value) {
@@ -81,6 +108,13 @@ function paintNumber(element, value) {
     ? value
     : Number(element.dataset.value);
   element.dataset.value = String(value);
+
+  if (from != null && from !== value && !Number.isNaN(from)) {
+    element.classList.remove("pulse-up", "pulse-down");
+    void element.offsetWidth;
+    element.classList.add(value > from ? "pulse-up" : "pulse-down");
+  }
+
   if (reduceMotion || from === value || Number.isNaN(from)) {
     element.textContent = format.format(value);
     return;
@@ -122,8 +156,19 @@ function paintCard(network) {
   paintNumber(card.querySelector(".count"), network.count);
   paintDelta(card.querySelector(".delta"), network.delta);
   const spark = card.querySelector(".spark");
-  spark.classList.toggle("empty", network.count == null);
-  spark.querySelector("path").setAttribute("d", linePath(network.series || []));
+  const isEmpty = network.count == null;
+  spark.classList.toggle("empty", isEmpty);
+  const paths = sparkPaths(network.series || []);
+  const lineEl = spark.querySelector(".spark-line");
+  const areaEl = spark.querySelector(".spark-area");
+  const dotEl = spark.querySelector(".spark-dot");
+  if (lineEl) lineEl.setAttribute("d", paths.line);
+  if (areaEl) areaEl.setAttribute("d", paths.area);
+  if (dotEl) {
+    dotEl.setAttribute("cx", paths.dot.x.toFixed(1));
+    dotEl.setAttribute("cy", paths.dot.y.toFixed(1));
+    dotEl.style.display = paths.dot.visible && !isEmpty ? "" : "none";
+  }
 }
 
 function apply(data) {
