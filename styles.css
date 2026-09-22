@@ -42,6 +42,7 @@ body {
 .brand {
   display: flex;
   align-items: center;
+  gap: 10px;
   margin: 0 0 18px;
   color: var(--muted);
   font-size: 13px;
@@ -50,12 +51,26 @@ body {
   text-transform: uppercase;
 }
 
+.brand-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+}
+
+.brand-title {
+  display: inline-block;
+}
+
 .pulse-beacon {
   position: relative;
   display: inline-block;
   width: 7px;
   height: 7px;
-  margin-right: 10px;
+  margin: 0 2px 0 0;
   border-radius: 50%;
   background: var(--up);
   box-shadow: 0 0 8px var(--up);
@@ -103,6 +118,8 @@ body {
 }
 
 .card {
+  --trend-color: rgba(255, 255, 255, 0.72);
+  --trend-glow: rgba(255, 255, 255, 0.16);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -118,11 +135,26 @@ body {
   animation: rise 0.7s var(--ease) both;
 }
 
+.card.trend-up {
+  --trend-color: var(--up);
+  --trend-glow: rgba(62, 224, 160, 0.28);
+}
+
+.card.trend-down {
+  --trend-color: var(--down);
+  --trend-glow: rgba(255, 93, 108, 0.28);
+}
+
+.card.trend-neutral {
+  --trend-color: rgba(255, 255, 255, 0.65);
+  --trend-glow: rgba(255, 255, 255, 0.12);
+}
+
 @media (hover: hover) {
   .card:hover {
     transform: translateY(-2px);
     border-color: var(--line-strong);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 14px 34px rgba(0, 0, 0, 0.45), 0 0 20px var(--accent-glow, transparent);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 14px 34px rgba(0, 0, 0, 0.45), 0 0 20px var(--trend-glow, transparent);
   }
 }
 
@@ -253,12 +285,12 @@ body {
 
 .spark-line {
   fill: none;
-  stroke: var(--accent, rgba(255, 255, 255, 0.72));
+  stroke: var(--trend-color, rgba(255, 255, 255, 0.72));
   stroke-width: 1.6;
   stroke-linecap: round;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
-  transition: d 0.4s ease;
+  transition: d 0.4s ease, stroke 0.3s ease;
 }
 
 .spark-area {
@@ -267,9 +299,9 @@ body {
 }
 
 .spark-dot {
-  fill: var(--accent, #fff);
-  filter: drop-shadow(0 0 4px var(--accent, #fff));
-  transition: cx 0.4s ease, cy 0.4s ease;
+  fill: var(--trend-color, #fff);
+  filter: drop-shadow(0 0 5px var(--trend-color, #fff));
+  transition: cx 0.4s ease, cy 0.4s ease, fill 0.3s ease;
 }
 
 .spark.empty .spark-line {
@@ -383,10 +415,15 @@ body {
     r: 2;
   }
 
+  .brand-avatar {
+    width: 22px;
+    height: 22px;
+  }
+
   .pulse-beacon {
     width: 6px;
     height: 6px;
-    margin-right: 8px;
+    margin-right: 4px;
   }
 }
 

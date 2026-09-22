@@ -48,12 +48,20 @@ function mountCards() {
       <div class="delta"></div>
       <svg class="spark empty" viewBox="0 0 160 36" preserveAspectRatio="none" aria-hidden="true">
         <defs>
-          <linearGradient id="spark-grad-${network.id}" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.32"/>
-            <stop offset="100%" stop-color="var(--accent)" stop-opacity="0.0"/>
+          <linearGradient id="spark-grad-up-${network.id}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--up)" stop-opacity="0.30"/>
+            <stop offset="100%" stop-color="var(--up)" stop-opacity="0.0"/>
+          </linearGradient>
+          <linearGradient id="spark-grad-down-${network.id}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--down)" stop-opacity="0.30"/>
+            <stop offset="100%" stop-color="var(--down)" stop-opacity="0.0"/>
+          </linearGradient>
+          <linearGradient id="spark-grad-neutral-${network.id}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.20"/>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0"/>
           </linearGradient>
         </defs>
-        <path class="spark-area" fill="url(#spark-grad-${network.id})" d=""></path>
+        <path class="spark-area" fill="url(#spark-grad-neutral-${network.id})" d=""></path>
         <path class="spark-line" d=""></path>
         <circle class="spark-dot" r="2.5" cx="-10" cy="-10"></circle>
       </svg>
@@ -155,6 +163,13 @@ function paintCard(network) {
   if (!card) return;
   paintNumber(card.querySelector(".count"), network.count);
   paintDelta(card.querySelector(".delta"), network.delta);
+
+  card.classList.remove("trend-up", "trend-down", "trend-neutral");
+  let trend = "neutral";
+  if (network.delta > 0) trend = "up";
+  else if (network.delta < 0) trend = "down";
+  card.classList.add(`trend-${trend}`);
+
   const spark = card.querySelector(".spark");
   const isEmpty = network.count == null;
   spark.classList.toggle("empty", isEmpty);
@@ -163,7 +178,10 @@ function paintCard(network) {
   const areaEl = spark.querySelector(".spark-area");
   const dotEl = spark.querySelector(".spark-dot");
   if (lineEl) lineEl.setAttribute("d", paths.line);
-  if (areaEl) areaEl.setAttribute("d", paths.area);
+  if (areaEl) {
+    areaEl.setAttribute("d", paths.area);
+    areaEl.setAttribute("fill", `url(#spark-grad-${trend}-${network.id})`);
+  }
   if (dotEl) {
     dotEl.setAttribute("cx", paths.dot.x.toFixed(1));
     dotEl.setAttribute("cy", paths.dot.y.toFixed(1));

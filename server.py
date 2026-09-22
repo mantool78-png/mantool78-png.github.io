@@ -237,11 +237,15 @@ PUBLIC_FILES = {
     "/index.html": ROOT / "index.html",
     "/styles.css": ROOT / "styles.css",
     "/app.js": ROOT / "app.js",
+    "/avatar.jpg": ROOT / "avatar.jpg",
 }
 FILE_TYPES = {
     ".html": "text/html; charset=utf-8",
     ".css": "text/css; charset=utf-8",
     ".js": "text/javascript; charset=utf-8",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
 }
 
 
