@@ -149,16 +149,144 @@ function sparkPaths(series) {
   };
 }
 
-function paintNumber(element, value) {
+function isRoundHundred(value) {
+  return typeof value === "number" && value >= 100 && value % 100 === 0;
+}
+
+function markRound(element, value, key) {
+  const round = isRoundHundred(value);
+  element.classList.toggle("round", round);
+  if (!round || !key) return;
+  const mark = `acro-salute:${key}:${value}`;
+  try {
+    if (sessionStorage.getItem(mark)) return;
+    sessionStorage.setItem(mark, "1");
+  } catch {
+    return;
+  }
+  launchSalute();
+}
+
+let saluteCanvas = null;
+
+function launchSalute() {
+  if (reduceMotion || saluteCanvas) return;
+  const canvas = document.createElement("canvas");
+  canvas.className = "salute";
+  canvas.setAttribute("aria-hidden", "true");
+  document.body.appendChild(canvas);
+  saluteCanvas = canvas;
+  const ctx = canvas.getContext("2d");
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const rockets = [];
+  const sparks = [];
+  const width = () => window.innerWidth;
+  const height = () => window.innerHeight;
+
+  function resize() {
+    canvas.width = Math.round(width() * dpr);
+    canvas.height = Math.round(height() * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+
+  function burst(x, y, color) {
+    const count = 72;
+    for (let i = 0; i < count; i += 1) {
+      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.2;
+      const speed = 2.2 + Math.random() * 5.2;
+      sparks.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 1,
+        color: i % 4 === 0 ? "#fff4d2" : color,
+        radius: 2.2 + Math.random() * 2.4,
+      });
+    }
+  }
+
+  const plan = [
+    { at: 80, x: 0.22, y: 0.34, color: "#ffd56a" },
+    { at: 360, x: 0.72, y: 0.3, color: "#3ee0a0" },
+    { at: 640, x: 0.48, y: 0.24, color: "#fff4d2" },
+    { at: 920, x: 0.3, y: 0.46, color: "#9be7ff" },
+    { at: 1160, x: 0.66, y: 0.42, color: "#ffd56a" },
+  ];
+  plan.forEach((shot) => {
+    rockets.push({
+      x: shot.x * width(),
+      y: height() + 8,
+      tx: shot.x * width(),
+      ty: shot.y * height(),
+      color: shot.color,
+      born: performance.now() + shot.at,
+      done: false,
+    });
+  });
+
+  const started = performance.now();
+  function frame(now) {
+    if (!canvas.isConnected) return;
+    ctx.clearRect(0, 0, width(), height());
+    for (const rocket of rockets) {
+      if (rocket.done || now < rocket.born) continue;
+      const t = Math.min(1, (now - rocket.born) / 520);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const y = rocket.y + (rocket.ty - rocket.y) * eased;
+      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = rocket.color;
+      ctx.beginPath();
+      ctx.arc(rocket.tx, y, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+      if (t >= 1) {
+        rocket.done = true;
+        burst(rocket.tx, rocket.ty, rocket.color);
+      }
+    }
+    for (let i = sparks.length - 1; i >= 0; i -= 1) {
+      const spark = sparks[i];
+      spark.vy += 0.026;
+      spark.x += spark.vx;
+      spark.y += spark.vy;
+      spark.vx *= 0.988;
+      spark.life -= 0.0045;
+      if (spark.life <= 0) {
+        sparks.splice(i, 1);
+        continue;
+      }
+      ctx.globalAlpha = Math.max(0, spark.life);
+      ctx.fillStyle = spark.color;
+      ctx.shadowBlur = 16;
+      ctx.shadowColor = spark.color;
+      ctx.beginPath();
+      ctx.arc(spark.x, spark.y, spark.radius * (0.45 + spark.life), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+    ctx.globalAlpha = 1;
+    if (now - started < 5600) requestAnimationFrame(frame);
+    else {
+      canvas.remove();
+      if (saluteCanvas === canvas) saluteCanvas = null;
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+function paintNumber(element, value, key) {
   if (value == null) {
     element.textContent = "—";
     element.dataset.value = "";
+    element.classList.remove("round");
     return;
   }
   const from = element.dataset.value === "" || element.dataset.value == null
     ? value
     : Number(element.dataset.value);
   element.dataset.value = String(value);
+  markRound(element, value, key);
 
   if (from != null && from !== value && !Number.isNaN(from)) {
     element.classList.remove("pulse-up", "pulse-down");
@@ -204,7 +332,7 @@ function paintDelta(element, delta) {
 function paintCard(network) {
   const card = grid.querySelector(`[data-id="${network.id}"]`);
   if (!card) return;
-  paintNumber(card.querySelector(".count"), network.count);
+  paintNumber(card.querySelector(".count"), network.count, network.id);
   paintDelta(card.querySelector(".delta"), network.delta);
 
   card.classList.remove("trend-up", "trend-down", "trend-neutral");
@@ -235,7 +363,7 @@ function paintCard(network) {
 function apply(data) {
   const known = (data.networks || []).filter((item) => item.count != null);
   const total = known.reduce((sum, item) => sum + item.count, 0);
-  paintNumber(totalEl, known.length ? total : null);
+  paintNumber(totalEl, known.length ? total : null, "total");
   for (const network of data.networks || []) paintCard(network);
 }
 
