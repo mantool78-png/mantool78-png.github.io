@@ -2,31 +2,37 @@ const NETWORKS = [
   {
     id: "telegram",
     name: "Telegram",
+    url: "https://t.me/acrotim",
     icon: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.2 7.7 13.4 3.4c.5-.2 1 .3.8.8l-2.3 8.2c-.1.5-.7.7-1.1.4l-2.6-2-1.3 1.3c-.2.2-.5.1-.6-.2l-.4-2.2 5.2-4.7-6.4 4.1L2.6 8.5c-.5-.2-.5-.8 0-.8Z" fill="currentColor"/></svg>',
   },
   {
     id: "youtube",
     name: "YouTube",
+    url: "https://www.youtube.com/channel/UCBG6Fg2flgYnhQGiBZkyK7Q",
     icon: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="3.5" width="13" height="9" rx="2.2" stroke="currentColor" stroke-width="1.3"/><path d="M7 6.2v3.6l3-1.8-3-1.8Z" fill="currentColor"/></svg>',
   },
   {
     id: "vk",
     name: "ВКонтакте",
+    url: "https://vk.ru/club225676956",
     icon: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.2 4.2h2.1c.1 2.1 1.1 3.3 1.9 3.8V4.2h2v2.3c.8-.4 1.6-1.6 1.9-2.3h2c-.4 1.2-1.5 2.6-2.3 3.3.9.5 2.1 1.7 2.6 3.2h-2.2c-.4-1-1.2-1.9-2-2.3v2.3H6.2V9.1C4.6 8.7 2.8 6.9 2.2 4.2Z" fill="currentColor"/></svg>',
   },
   {
     id: "tiktok",
     name: "TikTok",
+    url: "https://www.tiktok.com/@slovoacrobata",
     icon: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M9.2 2.2h1.7c.2 1.3 1 2.3 2.3 2.6v1.7c-.9 0-1.7-.3-2.3-.8v4.1a3.6 3.6 0 1 1-3.6-3.6c.2 0 .4 0 .6.1v1.8a1.8 1.8 0 1 0 1.3 1.7V2.2Z" fill="currentColor"/></svg>',
   },
   {
     id: "dzen",
     name: "Дзен",
+    url: "https://dzen.ru/gymacro.ru",
     icon: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.6c.2 2.4.7 3.8 1.8 4.6 1.1.8 2.6 1.1 4.6 1.2-2 .2-3.5.5-4.6 1.3-1.1.8-1.6 2.2-1.8 4.7-.2-2.5-.7-3.9-1.8-4.7C5 8.9 3.5 8.6 1.6 8.4c2-.1 3.5-.4 4.6-1.2C7.3 6.4 7.8 5 8 1.6Z" fill="currentColor"/></svg>',
   },
   {
     id: "max",
     name: "Макс",
+    url: "https://max.ru/se14052651_biz",
     icon: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.2 3.4h11.6v7.4c0 .9-.7 1.6-1.6 1.6H6.2L3.4 14.2V12.4H3.8c-.9 0-1.6-.7-1.6-1.6V3.4Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
   },
 ];
@@ -39,7 +45,8 @@ const shown = new Map();
 
 function mountCards() {
   grid.innerHTML = NETWORKS.map((network, index) => `
-    <article class="card" style="animation-delay:${index * 60}ms" data-id="${network.id}">
+    <a class="card-link" href="${network.url}" aria-label="${network.name}">
+      <article class="card" data-id="${network.id}" style="animation-delay:${index * 60}ms">
       <div class="card-top">
         <span class="mark">${network.icon}</span>
         <span class="name">${network.name}</span>
@@ -65,9 +72,45 @@ function mountCards() {
         <path class="spark-line" d=""></path>
         <circle class="spark-dot" r="2.5" cx="-10" cy="-10"></circle>
       </svg>
-    </article>
+      </article>
+    </a>
   `).join("");
 }
+
+let lastOpen = 0;
+
+function openCard(link) {
+  const now = Date.now();
+  if (now - lastOpen < 700) return;
+  lastOpen = now;
+  const url = link.href;
+  const phone = window.matchMedia("(max-width: 760px), (pointer: coarse)").matches;
+  if (phone) {
+    window.location.assign(url);
+    return;
+  }
+  const popup = window.open(url, "_blank", "noopener,noreferrer");
+  if (!popup) window.location.assign(url);
+}
+
+function cardFromEvent(event) {
+  const node = event.target && event.target.closest ? event.target : event.target && event.target.parentElement;
+  return node && node.closest ? node.closest("a.card-link") : null;
+}
+
+grid.addEventListener("click", (event) => {
+  const link = cardFromEvent(event);
+  if (!link) return;
+  event.preventDefault();
+  openCard(link);
+});
+
+grid.addEventListener("touchend", (event) => {
+  const link = cardFromEvent(event);
+  if (!link) return;
+  event.preventDefault();
+  openCard(link);
+}, { passive: false });
 
 function sparkPaths(series) {
   const width = 160;
