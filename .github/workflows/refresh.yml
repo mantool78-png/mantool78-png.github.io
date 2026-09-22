@@ -6,9 +6,14 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    paths:
+      - ".github/workflows/refresh.yml"
+      - "server.py"
+      - "collect.py"
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: refresh-stats
@@ -16,7 +21,7 @@ concurrency:
 
 jobs:
   refresh:
-    if: github.actor != 'github-actions[bot]'
+    if: github.event_name != 'push' || github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,3 +40,10 @@ jobs:
           git add data/history.json stats.json
           git diff --staged --quiet || git commit -m "Обновить цифры подписчиков"
           git push
+      - name: Следующий съём через 15 минут
+        if: success() || failure()
+        run: |
+          sleep 900
+          gh workflow run refresh.yml --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}
