@@ -11,20 +11,20 @@
     },
     {
       "id": "youtube",
-      "count": 209,
-      "delta": 1,
+      "count": 210,
+      "delta": 2,
       "series": [
         208,
-        209
+        210
       ]
     },
     {
       "id": "vk",
-      "count": 10506,
-      "delta": 64,
+      "count": 10507,
+      "delta": 65,
       "series": [
         10442,
-        10506
+        10507
       ]
     },
     {
