@@ -3,36 +3,40 @@
     {
       "id": "telegram",
       "count": 6583,
-      "delta": -6,
+      "delta": 0,
       "series": [
         6589,
+        6583,
         6583
       ]
     },
     {
       "id": "youtube",
       "count": 210,
-      "delta": 2,
+      "delta": 0,
       "series": [
         208,
+        210,
         210
       ]
     },
     {
       "id": "vk",
-      "count": 10543,
-      "delta": 101,
+      "count": 10546,
+      "delta": 3,
       "series": [
         10442,
-        10543
+        10543,
+        10546
       ]
     },
     {
       "id": "tiktok",
       "count": 152,
-      "delta": 7,
+      "delta": 0,
       "series": [
         145,
+        152,
         152
       ]
     },
@@ -42,14 +46,16 @@
       "delta": 0,
       "series": [
         130,
+        130,
         130
       ]
     },
     {
       "id": "max",
       "count": 376,
-      "delta": null,
+      "delta": 0,
       "series": [
+        376,
         376
       ]
     }
