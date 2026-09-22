@@ -2,11 +2,11 @@
   "networks": [
     {
       "id": "telegram",
-      "count": 6586,
-      "delta": -3,
+      "count": 6585,
+      "delta": -4,
       "series": [
         6589,
-        6586
+        6585
       ]
     },
     {
@@ -20,11 +20,11 @@
     },
     {
       "id": "vk",
-      "count": 10478,
-      "delta": 36,
+      "count": 10491,
+      "delta": 49,
       "series": [
         10442,
-        10478
+        10491
       ]
     },
     {
@@ -47,10 +47,10 @@
     },
     {
       "id": "max",
-      "count": 373,
+      "count": 374,
       "delta": null,
       "series": [
-        373
+        374
       ]
     }
   ]
