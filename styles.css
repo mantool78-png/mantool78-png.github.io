@@ -42,23 +42,13 @@ body {
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   margin: 0 0 18px;
   color: var(--muted);
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-}
-
-.brand-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
-  flex-shrink: 0;
 }
 
 .brand-title {
@@ -102,6 +92,12 @@ body {
   }
 }
 
+.total-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(16px, 2.5vw, 32px);
+}
+
 .total {
   margin: 0;
   font-size: clamp(76px, 11vw, 148px);
@@ -109,6 +105,25 @@ body {
   line-height: 0.86;
   letter-spacing: -0.055em;
   font-variant-numeric: tabular-nums;
+}
+
+.hero-cat {
+  width: clamp(72px, 8.5vw, 120px);
+  height: clamp(72px, 8.5vw, 120px);
+  object-fit: contain;
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 20px rgba(37, 244, 238, 0.25));
+  animation: cat-float 3.8s ease-in-out infinite;
+  pointer-events: none;
+  user-select: none;
+}
+
+@keyframes cat-float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1.5deg);
+  }
 }
 
 .grid {
@@ -360,8 +375,18 @@ body {
     letter-spacing: 0.14em;
   }
 
+  .total-wrap {
+    gap: 10px;
+  }
+
   .total {
     font-size: clamp(36px, 8svh, 56px);
+  }
+
+  .hero-cat {
+    width: clamp(38px, 8svh, 54px);
+    height: clamp(38px, 8svh, 54px);
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 12px rgba(37, 244, 238, 0.25));
   }
 
   .grid {
@@ -413,11 +438,6 @@ body {
 
   .spark-dot {
     r: 2;
-  }
-
-  .brand-avatar {
-    width: 22px;
-    height: 22px;
   }
 
   .pulse-beacon {

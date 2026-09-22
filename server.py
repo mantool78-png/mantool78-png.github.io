@@ -238,6 +238,7 @@ PUBLIC_FILES = {
     "/styles.css": ROOT / "styles.css",
     "/app.js": ROOT / "app.js",
     "/avatar.jpg": ROOT / "avatar.jpg",
+    "/cat-avatar.png": ROOT / "cat-avatar.png",
 }
 FILE_TYPES = {
     ".html": "text/html; charset=utf-8",
