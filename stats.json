@@ -2,12 +2,12 @@
   "networks": [
     {
       "id": "telegram",
-      "count": 6586,
-      "delta": 3,
+      "count": 6585,
+      "delta": 2,
       "series": [
         6589,
         6583,
-        6586
+        6585
       ]
     },
     {
@@ -22,22 +22,22 @@
     },
     {
       "id": "vk",
-      "count": 10603,
-      "delta": 60,
+      "count": 10604,
+      "delta": 61,
       "series": [
         10442,
         10543,
-        10603
+        10604
       ]
     },
     {
       "id": "tiktok",
-      "count": 155,
-      "delta": 3,
+      "count": 156,
+      "delta": 4,
       "series": [
         145,
         152,
-        155
+        156
       ]
     },
     {
