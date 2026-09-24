@@ -2,13 +2,13 @@
   "networks": [
     {
       "id": "telegram",
-      "count": 6603,
-      "delta": 16,
+      "count": 6605,
+      "delta": 18,
       "series": [
         6589,
         6583,
         6587,
-        6603
+        6605
       ]
     },
     {
@@ -57,12 +57,12 @@
     },
     {
       "id": "max",
-      "count": 390,
-      "delta": 9,
+      "count": 391,
+      "delta": 10,
       "series": [
         376,
         381,
-        390
+        391
       ]
     }
   ]
