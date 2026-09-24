@@ -2,38 +2,38 @@
   "networks": [
     {
       "id": "telegram",
-      "count": 6608,
-      "delta": -1,
+      "count": 6609,
+      "delta": 0,
       "series": [
         6589,
         6583,
         6587,
         6609,
-        6608
+        6609
       ]
     },
     {
       "id": "youtube",
-      "count": 216,
-      "delta": 4,
+      "count": 215,
+      "delta": 3,
       "series": [
         208,
         210,
         210,
         212,
-        216
+        215
       ]
     },
     {
       "id": "vk",
-      "count": 10694,
-      "delta": 7,
+      "count": 10695,
+      "delta": 8,
       "series": [
         10442,
         10543,
         10615,
         10687,
-        10694
+        10695
       ]
     },
     {
