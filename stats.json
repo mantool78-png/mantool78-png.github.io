@@ -2,72 +2,78 @@
   "networks": [
     {
       "id": "telegram",
-      "count": 6620,
-      "delta": 11,
+      "count": 6618,
+      "delta": -2,
       "series": [
         6589,
         6583,
         6587,
         6609,
-        6620
+        6620,
+        6618
       ]
     },
     {
       "id": "youtube",
-      "count": 221,
-      "delta": 9,
+      "count": 222,
+      "delta": 1,
       "series": [
         208,
         210,
         210,
         212,
-        221
+        221,
+        222
       ]
     },
     {
       "id": "vk",
-      "count": 10733,
-      "delta": 46,
+      "count": 10734,
+      "delta": 1,
       "series": [
         10442,
         10543,
         10615,
         10687,
-        10733
+        10733,
+        10734
       ]
     },
     {
       "id": "tiktok",
       "count": 180,
-      "delta": 8,
+      "delta": 0,
       "series": [
         145,
         152,
         160,
         172,
+        180,
         180
       ]
     },
     {
       "id": "dzen",
       "count": 131,
-      "delta": 1,
+      "delta": 0,
       "series": [
         130,
         130,
         130,
         130,
+        131,
         131
       ]
     },
     {
       "id": "max",
       "count": 409,
-      "delta": 16,
+      "delta": 0,
       "series": [
         376,
         381,
         393,
+        409,
         409
       ]
     }
