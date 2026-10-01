@@ -45,14 +45,15 @@ const shown = new Map();
 
 function mountCards() {
   grid.innerHTML = NETWORKS.map((network, index) => `
+    <article class="card" data-id="${network.id}" style="animation-delay:${index * 60}ms">
     <a class="card-link" href="${network.url}" aria-label="${network.name}">
-      <article class="card" data-id="${network.id}" style="animation-delay:${index * 60}ms">
       <div class="card-top">
         <span class="mark">${network.icon}</span>
         <span class="name">${network.name}</span>
       </div>
       <div class="count">—</div>
       <div class="delta"></div>
+      <p class="reach" hidden></p>
       <svg class="spark empty" viewBox="0 0 160 36" preserveAspectRatio="none" aria-hidden="true">
         <defs>
           <linearGradient id="spark-grad-up-${network.id}" x1="0" y1="0" x2="0" y2="1">
@@ -72,8 +73,9 @@ function mountCards() {
         <path class="spark-line" d=""></path>
         <circle class="spark-dot" r="2.5" cx="-10" cy="-10"></circle>
       </svg>
-      </article>
     </a>
+    <a class="best" hidden rel="noopener noreferrer"></a>
+    </article>
   `).join("");
 }
 
@@ -95,7 +97,7 @@ function openCard(link) {
 
 function cardFromEvent(event) {
   const node = event.target && event.target.closest ? event.target : event.target && event.target.parentElement;
-  return node && node.closest ? node.closest("a.card-link") : null;
+  return node && node.closest ? node.closest("a.best, a.card-link") : null;
 }
 
 grid.addEventListener("click", (event) => {
@@ -329,11 +331,229 @@ function paintDelta(element, delta) {
   element.textContent = "0 за сутки";
 }
 
+const PERIODS = ["week", "month", "all"];
+let period = "week";
+try {
+  const savedPeriod = localStorage.getItem("acro-period");
+  if (PERIODS.includes(savedPeriod)) period = savedPeriod;
+} catch {
+  period = "week";
+}
+
+const periodBar = document.getElementById("periods");
+const periodButtons = [...periodBar.querySelectorAll(".period")];
+const forecastEl = document.getElementById("forecast");
+const updatedEl = document.getElementById("updated");
+let latest = null;
+let generatedAt = "";
+
+function plural(value, one, few, many) {
+  const abs = Math.abs(value) % 100;
+  const last = abs % 10;
+  if (abs > 10 && abs < 20) return many;
+  if (last === 1) return one;
+  if (last >= 2 && last <= 4) return few;
+  return many;
+}
+
+function syncPeriods() {
+  for (const button of periodButtons) {
+    const active = button.dataset.period === period;
+    button.setAttribute("aria-checked", active ? "true" : "false");
+    button.tabIndex = active ? 0 : -1;
+  }
+}
+
+function selectPeriod(next) {
+  if (!PERIODS.includes(next) || next === period) return;
+  period = next;
+  try {
+    localStorage.setItem("acro-period", period);
+  } catch {
+    /* private mode */
+  }
+  syncPeriods();
+  if (latest) apply(latest);
+}
+
+periodButtons.forEach((button) => {
+  button.addEventListener("click", () => selectPeriod(button.dataset.period));
+});
+
+periodBar.addEventListener("keydown", (event) => {
+  const index = PERIODS.indexOf(period);
+  let next = index;
+  if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (index + 1) % PERIODS.length;
+  else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (index + PERIODS.length - 1) % PERIODS.length;
+  else return;
+  event.preventDefault();
+  selectPeriod(PERIODS[next]);
+  periodButtons[next].focus();
+});
+syncPeriods();
+
+function sortedHistory(network) {
+  return (Array.isArray(network.history) ? network.history : [])
+    .filter((point) => point && typeof point.count === "number" && typeof point.date === "string")
+    .slice()
+    .sort((left, right) => (left.date < right.date ? -1 : left.date > right.date ? 1 : 0));
+}
+
+function seriesFor(network) {
+  if (period === "week") return network.series || [];
+  const points = sortedHistory(network);
+  if (!points.length) return network.series || [];
+  if (period === "month") return points.slice(-30).map((point) => point.count);
+  return points.map((point) => point.count);
+}
+
+function nextMilestone(total) {
+  if (total < 1000) {
+    for (const mark of [100, 250, 500, 1000]) {
+      if (total < mark) return mark;
+    }
+    return 1000;
+  }
+  if (total < 10000) return Math.floor(total / 1000) * 1000 + 1000;
+  return Math.floor(total / 5000) * 5000 + 5000;
+}
+
+function dailyTotals(networks) {
+  const histories = networks.map(sortedHistory).filter((points) => points.length);
+  if (!histories.length) return [];
+  const dates = new Set();
+  for (const points of histories) {
+    for (const point of points) dates.add(point.date);
+  }
+  const totals = [];
+  for (const date of [...dates].sort()) {
+    let sum = 0;
+    let ready = 0;
+    for (const points of histories) {
+      let value = null;
+      for (const point of points) {
+        if (point.date <= date) value = point.count;
+        else break;
+      }
+      if (value == null) continue;
+      sum += value;
+      ready += 1;
+    }
+    if (ready === histories.length) totals.push({ date, total: sum });
+  }
+  return totals;
+}
+
+function forecastText(networks, total) {
+  if (typeof total !== "number" || total <= 0) return "";
+  const recent = dailyTotals(networks).slice(-8);
+  if (recent.length < 3) return "";
+  const first = recent[0];
+  const last = recent[recent.length - 1];
+  const span = (Date.parse(last.date) - Date.parse(first.date)) / 86400000;
+  if (!(span >= 2)) return "";
+  const rate = (last.total - first.total) / span;
+  if (!(rate > 0)) return "";
+  const goal = nextMilestone(total);
+  const left = goal - total;
+  if (!(left > 0)) return "";
+  const days = Math.max(1, Math.round(left / rate));
+  const pace = days > 400
+    ? "больше года при текущем темпе"
+    : `≈${format.format(days)} ${plural(days, "день", "дня", "дней")} при текущем темпе`;
+  return `до ${format.format(goal)} осталось ${format.format(left)} · ${pace}`;
+}
+
+function paintForecast(text) {
+  if (!text) {
+    forecastEl.hidden = true;
+    forecastEl.textContent = "";
+    return;
+  }
+  forecastEl.hidden = false;
+  if (forecastEl.textContent !== text) forecastEl.textContent = text;
+}
+
+function updatedLabel(iso) {
+  const then = Date.parse(iso);
+  if (Number.isNaN(then)) return "";
+  const delta = Date.now() - then;
+  if (delta < 60000) return "обновлено только что";
+  const minutes = Math.floor(delta / 60000);
+  if (minutes < 60) {
+    return `обновлено ${minutes} ${plural(minutes, "минуту", "минуты", "минут")} назад`;
+  }
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    return `обновлено ${hours} ${plural(hours, "час", "часа", "часов")} назад`;
+  }
+  const days = Math.floor(hours / 24);
+  return `обновлено ${days} ${plural(days, "день", "дня", "дней")} назад`;
+}
+
+function paintUpdated() {
+  const label = generatedAt ? updatedLabel(generatedAt) : "";
+  if (!label) {
+    updatedEl.hidden = true;
+    updatedEl.textContent = "";
+    updatedEl.removeAttribute("datetime");
+    return;
+  }
+  updatedEl.hidden = false;
+  updatedEl.dateTime = generatedAt;
+  updatedEl.textContent = label;
+}
+
+function safePostUrl(url) {
+  return typeof url === "string" && /^https:\/\/(t\.me|vk\.ru|vk\.com)\//.test(url);
+}
+
+function paintReach(card, network) {
+  const reach = card.querySelector(".reach");
+  if (!reach) return;
+  if (typeof network.reach !== "number") {
+    reach.hidden = true;
+    reach.textContent = "";
+    reach.removeAttribute("title");
+    return;
+  }
+  reach.hidden = false;
+  reach.textContent = `охват ${format.format(network.reach)}`;
+  reach.title = "Средние просмотры поста за 7 дней";
+}
+
+function paintBest(card, network) {
+  const best = card ? card.querySelector(".best") : null;
+  const post = network.best_post;
+  const visible = best && card && post && safePostUrl(post.url) && typeof post.views === "number";
+  if (!visible) {
+    if (best) {
+      best.hidden = true;
+      best.removeAttribute("href");
+      best.textContent = "";
+    }
+    if (card) card.classList.remove("has-best");
+    return;
+  }
+  best.hidden = false;
+  best.href = post.url;
+  best.textContent = `Лучший пост · ${format.format(post.views)}`;
+  const title = typeof post.title === "string" ? post.title : "";
+  best.title = title || "Лучший пост за неделю";
+  best.setAttribute(
+    "aria-label",
+    `${title ? `${title}. ` : ""}${format.format(post.views)} просмотров`,
+  );
+  card.classList.add("has-best");
+}
+
 function paintCard(network) {
   const card = grid.querySelector(`[data-id="${network.id}"]`);
   if (!card) return;
   paintNumber(card.querySelector(".count"), network.count, network.id);
   paintDelta(card.querySelector(".delta"), network.delta);
+  paintReach(card, network);
+  paintBest(card, network);
 
   card.classList.remove("trend-up", "trend-down", "trend-neutral");
   let trend = "neutral";
@@ -344,7 +564,7 @@ function paintCard(network) {
   const spark = card.querySelector(".spark");
   const isEmpty = network.count == null;
   spark.classList.toggle("empty", isEmpty);
-  const paths = sparkPaths(network.series || []);
+  const paths = sparkPaths(seriesFor(network));
   const lineEl = spark.querySelector(".spark-line");
   const areaEl = spark.querySelector(".spark-area");
   const dotEl = spark.querySelector(".spark-dot");
@@ -361,18 +581,56 @@ function paintCard(network) {
 }
 
 function apply(data) {
-  const known = (data.networks || []).filter((item) => item.count != null);
+  latest = data;
+  generatedAt = typeof data.generated_at === "string" ? data.generated_at : "";
+  paintUpdated();
+  const networks = data.networks || [];
+  const known = networks.filter((item) => item.count != null);
   const total = known.reduce((sum, item) => sum + item.count, 0);
   paintNumber(totalEl, known.length ? total : null, "total");
-  for (const network of data.networks || []) paintCard(network);
+  paintForecast(known.length ? forecastText(known, total) : "");
+  for (const network of networks) paintCard(network);
+}
+
+function networksHaveHistory(data) {
+  return (data.networks || []).some((network) => Array.isArray(network.history) && network.history.length);
+}
+
+function attachArchive(data, archive) {
+  const days = archive && archive.days;
+  if (!days || typeof days !== "object") return;
+  const dates = Object.keys(days).filter((date) => days[date] && typeof days[date] === "object").sort();
+  for (const network of data.networks || []) {
+    if (Array.isArray(network.history) && network.history.length) continue;
+    const points = [];
+    for (const date of dates) {
+      const value = days[date][network.id];
+      if (typeof value === "number") points.push({ date, count: value });
+    }
+    if (points.length) network.history = points;
+  }
 }
 
 async function refresh() {
   const response = await fetch(`stats.json?t=${Date.now()}`, { cache: "no-store" });
   if (!response.ok) return;
-  apply(await response.json());
+  const data = await response.json();
+  if (typeof data.generated_at !== "string") {
+    const lastModified = response.headers.get("last-modified");
+    if (lastModified) data.generated_at = lastModified;
+  }
+  if (!networksHaveHistory(data)) {
+    try {
+      const archive = await fetch(`data/history.json?t=${Date.now()}`, { cache: "no-store" });
+      if (archive.ok) attachArchive(data, await archive.json());
+    } catch {
+      /* series in stats.json is enough for the week view */
+    }
+  }
+  apply(data);
 }
 
 mountCards();
 refresh();
 setInterval(refresh, 20000);
+setInterval(paintUpdated, 30000);
