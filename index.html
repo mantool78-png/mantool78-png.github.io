@@ -4,25 +4,57 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Слово Акробата</title>
+  <meta name="description" content="Живое табло подписчиков «Слово Акробата»: Telegram, YouTube, ВКонтакте, TikTok, Дзен и MAX.">
+  <link rel="canonical" href="https://mantool78-png.github.io/">
+  <meta name="theme-color" content="#090a0c">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="Слово Акробата">
+  <meta property="og:title" content="Слово Акробата — подписчики">
+  <meta property="og:description" content="Живое табло подписчиков: Telegram, YouTube, ВКонтакте, TikTok, Дзен и MAX.">
+  <meta property="og:url" content="https://mantool78-png.github.io/">
+  <meta property="og:image" content="https://mantool78-png.github.io/og.png">
+  <meta property="og:image:secure_url" content="https://mantool78-png.github.io/og.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Кот и название «Слово Акробата» на тёмном фоне">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Слово Акробата — подписчики">
+  <meta name="twitter:description" content="Живое табло подписчиков: Telegram, YouTube, ВКонтакте, TikTok, Дзен и MAX.">
+  <meta name="twitter:image" content="https://mantool78-png.github.io/og.png">
+  <meta name="twitter:image:alt" content="Кот и название «Слово Акробата» на тёмном фоне">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="styles.css?v=10">
 </head>
 <body>
   <main class="screen">
     <header class="hero">
       <div class="brand">
-        <span class="pulse-beacon" aria-hidden="true"></span>
-        <span class="brand-title">Слово Акробата</span>
+        <span class="brand-name">
+          <span class="pulse-beacon" aria-hidden="true"></span>
+          <span class="brand-title">Слово Акробата</span>
+        </span>
+        <time class="updated" id="updated" hidden></time>
       </div>
       <div class="total-wrap">
         <p class="total" id="total" aria-live="polite">—</p>
         <img class="hero-cat" src="cat-avatar.png?v=4" alt="Кот Слово Акробата" width="110" height="110">
       </div>
+      <p class="forecast" id="forecast" hidden></p>
+      <div class="periods" id="periods" role="radiogroup" aria-label="Период графика">
+        <button type="button" class="period" role="radio" data-period="week" aria-checked="true">Неделя</button>
+        <button type="button" class="period" role="radio" data-period="month" aria-checked="false" tabindex="-1">Месяц</button>
+        <button type="button" class="period" role="radio" data-period="all" aria-checked="false" tabindex="-1">Всё время</button>
+      </div>
     </header>
     <section class="grid" id="grid" aria-label="Подписчики по сетям"></section>
   </main>
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>
