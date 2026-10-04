@@ -2,8 +2,8 @@
   "networks": [
     {
       "id": "telegram",
-      "count": 6635,
-      "delta": 0,
+      "count": 6634,
+      "delta": -1,
       "series": [
         6635,
         6639,
@@ -11,7 +11,7 @@
         6643,
         6643,
         6635,
-        6635
+        6634
       ],
       "history": [
         {
@@ -68,10 +68,10 @@
         },
         {
           "date": "2026-10-04",
-          "count": 6635
+          "count": 6634
         }
       ],
-      "reach": 2138,
+      "reach": 2139,
       "best_post": {
         "url": "https://t.me/ACROTIM/4560",
         "views": 4200,
@@ -443,5 +443,5 @@
       ]
     }
   ],
-  "generated_at": "2026-10-04T10:15:06+05:00"
+  "generated_at": "2026-10-04T10:30:20+05:00"
 }
