@@ -25,6 +25,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Повтор старого запуска иначе забирает его SHA, и push цифр
+          # отклоняется как non-fast-forward.
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -33,18 +37,16 @@ jobs:
           TZ: Asia/Yekaterinburg
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           VK_ACCESS_TOKEN: ${{ secrets.VK_ACCESS_TOKEN }}
-        run: python collect.py
+        run: bash .github/scripts/collect_stats.sh
       - name: Сохранить цифры
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/history.json stats.json
-          git diff --staged --quiet || git commit -m "Обновить цифры подписчиков"
-          git push
+        env:
+          TZ: Asia/Yekaterinburg
+        run: python .github/scripts/publish_stats.py
       - name: Следующий съём через 15 минут
         if: success() || failure()
-        run: |
-          sleep 900
-          gh workflow run refresh.yml --ref main
         env:
           GH_TOKEN: ${{ github.token }}
+          TZ: Asia/Yekaterinburg
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          VK_ACCESS_TOKEN: ${{ secrets.VK_ACCESS_TOKEN }}
+        run: bash .github/scripts/dispatch_next.sh
