@@ -130,10 +130,10 @@
     "2026-10-07": {
       "telegram": 6628,
       "youtube": 248,
-      "tiktok": 273,
+      "tiktok": 274,
       "max": 479,
       "dzen": 136,
-      "vk": 11511
+      "vk": 11512
     }
   },
   "insights": {
@@ -147,7 +147,7 @@
       }
     },
     "vk": {
-      "reach": 904,
+      "reach": 905,
       "best_post": {
         "url": "https://vk.ru/wall-225676956_9636",
         "views": 2508,
