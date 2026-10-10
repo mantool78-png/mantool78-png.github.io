@@ -153,10 +153,10 @@
     },
     "2026-10-10": {
       "telegram": 6633,
-      "youtube": 280,
+      "youtube": 281,
       "tiktok": 321,
       "max": 486,
-      "vk": 11717,
+      "vk": 11718,
       "dzen": 138
     }
   },
@@ -171,7 +171,7 @@
       }
     },
     "vk": {
-      "reach": 617,
+      "reach": 618,
       "best_post": {
         "url": "https://vk.ru/wall-225676956_9786",
         "views": 1804,
