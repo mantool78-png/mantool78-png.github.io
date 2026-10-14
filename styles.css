@@ -171,6 +171,7 @@ body {
 .day-change {
   max-width: 920px;
   margin: 14px 0 0;
+  color: var(--muted);
   font-size: 18px;
   font-weight: 500;
   line-height: 1.3;
@@ -408,6 +409,7 @@ body {
 .delta {
   min-height: 18px;
   margin-top: 8px;
+  color: var(--muted);
   font-size: 12px;
   font-weight: 500;
   letter-spacing: -0.02em;
@@ -416,18 +418,14 @@ body {
   white-space: nowrap;
 }
 
-.delta.up,
-.day-change.up {
+.delta .up,
+.day-change .up {
   color: var(--up);
 }
 
-.delta.down,
-.day-change.down {
+.delta .down,
+.day-change .down {
   color: var(--down);
-}
-
-.delta.solo {
-  color: var(--muted);
 }
 
 .reach {

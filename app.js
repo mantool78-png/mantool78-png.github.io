@@ -314,17 +314,20 @@ function paintNumber(element, value, key) {
 
 const YEKT = "Asia/Yekaterinburg";
 
-function yektYesterday(now = new Date()) {
-  const today = new Intl.DateTimeFormat("en-CA", {
+function yektToday(now = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", {
     timeZone: YEKT,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
   }).format(now);
-  const [year, month, day] = today.split("-").map(Number);
-  const previous = new Date(Date.UTC(year, month - 1, day));
-  previous.setUTCDate(previous.getUTCDate() - 1);
-  return previous.toISOString().slice(0, 10);
+}
+
+function shiftCalendarDay(isoDate, days) {
+  const [year, month, day] = isoDate.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
 }
 
 function countOnDate(network, date) {
@@ -342,59 +345,59 @@ function signedChange(delta) {
   return "0";
 }
 
-function shiftBetween(yesterday, today) {
-  if (typeof today !== "number") return null;
-  if (typeof yesterday !== "number") {
-    return { yesterday: null, today, delta: null, solo: true, text: format.format(today) };
-  }
-  const delta = today - yesterday;
+function networkGains(network, dayBefore, yesterday) {
+  const before = countOnDate(network, dayBefore);
+  const endYesterday = countOnDate(network, yesterday);
+  const current = typeof network.count === "number" ? network.count : null;
   return {
-    yesterday,
-    today,
-    delta,
-    solo: false,
-    text: `${format.format(yesterday)} → ${format.format(today)}, ${signedChange(delta)}`,
+    yesterday: typeof before === "number" && typeof endYesterday === "number" ? endYesterday - before : null,
+    today: typeof endYesterday === "number" && typeof current === "number" ? current - endYesterday : null,
   };
 }
 
-function networkShift(network, yesterdayDate) {
-  return shiftBetween(countOnDate(network, yesterdayDate), network.count);
-}
-
-function totalShift(networks, yesterdayDate) {
+function totalGains(networks, dayBefore, yesterday) {
   const known = networks.filter((item) => typeof item.count === "number");
-  if (!known.length) return null;
-  const today = known.reduce((sum, item) => sum + item.count, 0);
-  let yesterday = 0;
+  if (!known.length) return { yesterday: null, today: null };
+  let yesterdayGain = 0;
+  let todayGain = 0;
+  let yesterdayReady = true;
+  let todayReady = true;
   for (const item of known) {
-    const value = countOnDate(item, yesterdayDate);
-    if (typeof value !== "number") return shiftBetween(null, today);
-    yesterday += value;
+    const gains = networkGains(item, dayBefore, yesterday);
+    if (typeof gains.yesterday !== "number") yesterdayReady = false;
+    else yesterdayGain += gains.yesterday;
+    if (typeof gains.today !== "number") todayReady = false;
+    else todayGain += gains.today;
   }
-  return shiftBetween(yesterday, today);
+  return {
+    yesterday: yesterdayReady ? yesterdayGain : null,
+    today: todayReady ? todayGain : null,
+  };
 }
 
-function paintShift(element, shift, hideWithoutCompare) {
-  element.classList.remove("up", "down", "solo");
-  const comparable = shift && !shift.solo && typeof shift.delta === "number";
-  if (!comparable) {
-    if (hideWithoutCompare || !shift || !shift.solo) {
-      element.textContent = "";
-      element.removeAttribute("title");
-      if (hideWithoutCompare) element.hidden = true;
-      return;
-    }
-    element.hidden = false;
-    element.classList.add("solo");
-    element.textContent = shift.text;
-    element.title = "Сегодня";
+function paintGains(element, gains, hideWhenEmpty) {
+  const parts = [];
+  if (gains && typeof gains.yesterday === "number") parts.push(["вчера", gains.yesterday]);
+  if (gains && typeof gains.today === "number") parts.push(["сегодня", gains.today]);
+  if (!parts.length) {
+    element.replaceChildren();
+    element.removeAttribute("title");
+    if (hideWhenEmpty) element.hidden = true;
     return;
   }
+  const fragment = document.createDocumentFragment();
+  parts.forEach(([label, delta], index) => {
+    if (index) fragment.append(" · ");
+    fragment.append(`${label} `);
+    const sign = document.createElement("span");
+    if (delta > 0) sign.className = "up";
+    else if (delta < 0) sign.className = "down";
+    sign.textContent = signedChange(delta);
+    fragment.append(sign);
+  });
   element.hidden = false;
-  if (shift.delta > 0) element.classList.add("up");
-  else if (shift.delta < 0) element.classList.add("down");
-  element.textContent = shift.text;
-  element.title = "Вчера → сегодня";
+  element.replaceChildren(fragment);
+  element.title = parts.map(([label, delta]) => `${label} ${signedChange(delta)}`).join(" · ");
 }
 
 const PERIODS = ["week", "month", "all"];
@@ -414,6 +417,7 @@ const totalChangeEl = document.getElementById("total-change");
 let latest = null;
 let generatedAt = "";
 let yesterdayDate = "";
+let dayBeforeDate = "";
 
 function plural(value, one, few, many) {
   const abs = Math.abs(value) % 100;
@@ -618,13 +622,13 @@ function paintBest(card, network) {
 function paintCard(network) {
   const card = grid.querySelector(`[data-id="${network.id}"]`);
   if (!card) return;
-  const shift = networkShift(network, yesterdayDate);
+  const gains = networkGains(network, dayBeforeDate, yesterdayDate);
   paintNumber(card.querySelector(".count"), network.count, network.id);
-  paintShift(card.querySelector(".delta"), shift, false);
+  paintGains(card.querySelector(".delta"), gains, false);
   paintReach(card, network);
   paintBest(card, network);
 
-  const trendDelta = shift && typeof shift.delta === "number" ? shift.delta : network.delta;
+  const trendDelta = typeof gains.today === "number" ? gains.today : network.delta;
   card.classList.remove("trend-up", "trend-down", "trend-neutral");
   let trend = "neutral";
   if (trendDelta > 0) trend = "up";
@@ -652,14 +656,16 @@ function paintCard(network) {
 
 function apply(data) {
   latest = data;
-  yesterdayDate = yektYesterday();
+  const todayDate = yektToday();
+  yesterdayDate = shiftCalendarDay(todayDate, -1);
+  dayBeforeDate = shiftCalendarDay(todayDate, -2);
   generatedAt = typeof data.generated_at === "string" ? data.generated_at : "";
   paintUpdated();
   const networks = data.networks || [];
   const known = networks.filter((item) => item.count != null);
   const total = known.reduce((sum, item) => sum + item.count, 0);
   paintNumber(totalEl, known.length ? total : null, "total");
-  paintShift(totalChangeEl, known.length ? totalShift(known, yesterdayDate) : null, true);
+  paintGains(totalChangeEl, known.length ? totalGains(known, dayBeforeDate, yesterdayDate) : null, true);
   paintForecast(known.length ? forecastText(known, total) : "");
   for (const network of networks) paintCard(network);
 }
