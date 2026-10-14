@@ -382,13 +382,13 @@ function paintGains(element, gains, hideWhenEmpty) {
   if (!parts.length) {
     element.replaceChildren();
     element.removeAttribute("title");
+    element.removeAttribute("aria-label");
     if (hideWhenEmpty) element.hidden = true;
     return;
   }
   const fragment = document.createDocumentFragment();
-  parts.forEach(([label, delta], index) => {
+  parts.forEach(([, delta], index) => {
     if (index) fragment.append(" · ");
-    fragment.append(`${label} `);
     const sign = document.createElement("span");
     if (delta > 0) sign.className = "up";
     else if (delta < 0) sign.className = "down";
@@ -397,7 +397,9 @@ function paintGains(element, gains, hideWhenEmpty) {
   });
   element.hidden = false;
   element.replaceChildren(fragment);
-  element.title = parts.map(([label, delta]) => `${label} ${signedChange(delta)}`).join(" · ");
+  const hint = parts.map(([label, delta]) => `${label} ${signedChange(delta)}`).join(" · ");
+  element.title = hint;
+  element.setAttribute("aria-label", hint);
 }
 
 const PERIODS = ["week", "month", "all"];
