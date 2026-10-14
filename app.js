@@ -312,23 +312,89 @@ function paintNumber(element, value, key) {
   requestAnimationFrame(frame);
 }
 
-function paintDelta(element, delta) {
-  element.classList.remove("up", "down");
-  if (delta == null) {
-    element.textContent = "";
+const YEKT = "Asia/Yekaterinburg";
+
+function yektYesterday(now = new Date()) {
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: YEKT,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+  const [year, month, day] = today.split("-").map(Number);
+  const previous = new Date(Date.UTC(year, month - 1, day));
+  previous.setUTCDate(previous.getUTCDate() - 1);
+  return previous.toISOString().slice(0, 10);
+}
+
+function countOnDate(network, date) {
+  const points = Array.isArray(network.history) ? network.history : [];
+  for (let index = points.length - 1; index >= 0; index -= 1) {
+    const point = points[index];
+    if (point && point.date === date && typeof point.count === "number") return point.count;
+  }
+  return null;
+}
+
+function signedChange(delta) {
+  if (delta > 0) return `+${format.format(delta)}`;
+  if (delta < 0) return `−${format.format(Math.abs(delta))}`;
+  return "0";
+}
+
+function shiftBetween(yesterday, today) {
+  if (typeof today !== "number") return null;
+  if (typeof yesterday !== "number") {
+    return { yesterday: null, today, delta: null, solo: true, text: format.format(today) };
+  }
+  const delta = today - yesterday;
+  return {
+    yesterday,
+    today,
+    delta,
+    solo: false,
+    text: `${format.format(yesterday)} → ${format.format(today)}, ${signedChange(delta)}`,
+  };
+}
+
+function networkShift(network, yesterdayDate) {
+  return shiftBetween(countOnDate(network, yesterdayDate), network.count);
+}
+
+function totalShift(networks, yesterdayDate) {
+  const known = networks.filter((item) => typeof item.count === "number");
+  if (!known.length) return null;
+  const today = known.reduce((sum, item) => sum + item.count, 0);
+  let yesterday = 0;
+  for (const item of known) {
+    const value = countOnDate(item, yesterdayDate);
+    if (typeof value !== "number") return shiftBetween(null, today);
+    yesterday += value;
+  }
+  return shiftBetween(yesterday, today);
+}
+
+function paintShift(element, shift, hideWithoutCompare) {
+  element.classList.remove("up", "down", "solo");
+  const comparable = shift && !shift.solo && typeof shift.delta === "number";
+  if (!comparable) {
+    if (hideWithoutCompare || !shift || !shift.solo) {
+      element.textContent = "";
+      element.removeAttribute("title");
+      if (hideWithoutCompare) element.hidden = true;
+      return;
+    }
+    element.hidden = false;
+    element.classList.add("solo");
+    element.textContent = shift.text;
+    element.title = "Сегодня";
     return;
   }
-  if (delta > 0) {
-    element.classList.add("up");
-    element.textContent = `+${format.format(delta)} за сутки`;
-    return;
-  }
-  if (delta < 0) {
-    element.classList.add("down");
-    element.textContent = `−${format.format(Math.abs(delta))} за сутки`;
-    return;
-  }
-  element.textContent = "0 за сутки";
+  element.hidden = false;
+  if (shift.delta > 0) element.classList.add("up");
+  else if (shift.delta < 0) element.classList.add("down");
+  element.textContent = shift.text;
+  element.title = "Вчера → сегодня";
 }
 
 const PERIODS = ["week", "month", "all"];
@@ -344,8 +410,10 @@ const periodBar = document.getElementById("periods");
 const periodButtons = [...periodBar.querySelectorAll(".period")];
 const forecastEl = document.getElementById("forecast");
 const updatedEl = document.getElementById("updated");
+const totalChangeEl = document.getElementById("total-change");
 let latest = null;
 let generatedAt = "";
+let yesterdayDate = "";
 
 function plural(value, one, few, many) {
   const abs = Math.abs(value) % 100;
@@ -550,15 +618,17 @@ function paintBest(card, network) {
 function paintCard(network) {
   const card = grid.querySelector(`[data-id="${network.id}"]`);
   if (!card) return;
+  const shift = networkShift(network, yesterdayDate);
   paintNumber(card.querySelector(".count"), network.count, network.id);
-  paintDelta(card.querySelector(".delta"), network.delta);
+  paintShift(card.querySelector(".delta"), shift, false);
   paintReach(card, network);
   paintBest(card, network);
 
+  const trendDelta = shift && typeof shift.delta === "number" ? shift.delta : network.delta;
   card.classList.remove("trend-up", "trend-down", "trend-neutral");
   let trend = "neutral";
-  if (network.delta > 0) trend = "up";
-  else if (network.delta < 0) trend = "down";
+  if (trendDelta > 0) trend = "up";
+  else if (trendDelta < 0) trend = "down";
   card.classList.add(`trend-${trend}`);
 
   const spark = card.querySelector(".spark");
@@ -582,12 +652,14 @@ function paintCard(network) {
 
 function apply(data) {
   latest = data;
+  yesterdayDate = yektYesterday();
   generatedAt = typeof data.generated_at === "string" ? data.generated_at : "";
   paintUpdated();
   const networks = data.networks || [];
   const known = networks.filter((item) => item.count != null);
   const total = known.reduce((sum, item) => sum + item.count, 0);
   paintNumber(totalEl, known.length ? total : null, "total");
+  paintShift(totalChangeEl, known.length ? totalShift(known, yesterdayDate) : null, true);
   paintForecast(known.length ? forecastText(known, total) : "");
   for (const network of networks) paintCard(network);
 }

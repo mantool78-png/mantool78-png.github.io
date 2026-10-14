@@ -30,7 +30,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=10">
+  <link rel="stylesheet" href="styles.css?v=11">
 </head>
 <body>
   <main class="screen">
@@ -46,6 +46,7 @@
         <p class="total" id="total" aria-live="polite">—</p>
         <img class="hero-cat" src="cat-avatar.png?v=4" alt="Кот Слово Акробата" width="110" height="110">
       </div>
+      <p class="day-change" id="total-change" hidden></p>
       <p class="forecast" id="forecast" hidden></p>
       <div class="periods" id="periods" role="radiogroup" aria-label="Период графика">
         <button type="button" class="period" role="radio" data-period="week" aria-checked="true">Неделя</button>
@@ -55,6 +56,6 @@
     </header>
     <section class="grid" id="grid" aria-label="Подписчики по сетям"></section>
   </main>
-  <script src="app.js?v=9"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>
