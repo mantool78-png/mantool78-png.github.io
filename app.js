@@ -386,19 +386,28 @@ function paintGains(element, gains, hideWhenEmpty) {
     if (hideWhenEmpty) element.hidden = true;
     return;
   }
+  const today = parts.find(([label]) => label === "сегодня");
+  const yesterday = parts.find(([label]) => label === "вчера");
   const fragment = document.createDocumentFragment();
-  parts.forEach(([label, delta], index) => {
-    if (index) fragment.append(" · ");
-    if (label === "вчера") fragment.append("вчера ");
+  const appendSign = (delta) => {
     const sign = document.createElement("span");
     if (delta > 0) sign.className = "up";
     else if (delta < 0) sign.className = "down";
     sign.textContent = signedChange(delta);
     fragment.append(sign);
-  });
+  };
+  if (today) appendSign(today[1]);
+  if (yesterday) {
+    fragment.append(today ? " (вчера " : "вчера ");
+    appendSign(yesterday[1]);
+    if (today) fragment.append(")");
+  }
   element.hidden = false;
   element.replaceChildren(fragment);
-  const hint = parts.map(([label, delta]) => `${label} ${signedChange(delta)}`).join(" · ");
+  const hint = [today, yesterday]
+    .filter(Boolean)
+    .map(([label, delta]) => `${label} ${signedChange(delta)}`)
+    .join(" · ");
   element.title = hint;
   element.setAttribute("aria-label", hint);
 }
