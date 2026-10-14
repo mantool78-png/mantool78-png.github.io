@@ -387,8 +387,9 @@ function paintGains(element, gains, hideWhenEmpty) {
     return;
   }
   const fragment = document.createDocumentFragment();
-  parts.forEach(([, delta], index) => {
+  parts.forEach(([label, delta], index) => {
     if (index) fragment.append(" · ");
+    if (label === "вчера") fragment.append("вчера ");
     const sign = document.createElement("span");
     if (delta > 0) sign.className = "up";
     else if (delta < 0) sign.className = "down";
