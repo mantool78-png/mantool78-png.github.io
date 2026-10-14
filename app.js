@@ -312,23 +312,104 @@ function paintNumber(element, value, key) {
   requestAnimationFrame(frame);
 }
 
-function paintDelta(element, delta) {
-  element.classList.remove("up", "down");
-  if (delta == null) {
-    element.textContent = "";
+const YEKT = "Asia/Yekaterinburg";
+
+function yektToday(now = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: YEKT,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+}
+
+function shiftCalendarDay(isoDate, days) {
+  const [year, month, day] = isoDate.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function countOnDate(network, date) {
+  const points = Array.isArray(network.history) ? network.history : [];
+  for (let index = points.length - 1; index >= 0; index -= 1) {
+    const point = points[index];
+    if (point && point.date === date && typeof point.count === "number") return point.count;
+  }
+  return null;
+}
+
+function signedChange(delta) {
+  if (delta > 0) return `+${format.format(delta)}`;
+  if (delta < 0) return `−${format.format(Math.abs(delta))}`;
+  return "0";
+}
+
+function networkGains(network, dayBefore, yesterday) {
+  const before = countOnDate(network, dayBefore);
+  const endYesterday = countOnDate(network, yesterday);
+  const current = typeof network.count === "number" ? network.count : null;
+  return {
+    yesterday: typeof before === "number" && typeof endYesterday === "number" ? endYesterday - before : null,
+    today: typeof endYesterday === "number" && typeof current === "number" ? current - endYesterday : null,
+  };
+}
+
+function totalGains(networks, dayBefore, yesterday) {
+  const known = networks.filter((item) => typeof item.count === "number");
+  if (!known.length) return { yesterday: null, today: null };
+  let yesterdayGain = 0;
+  let todayGain = 0;
+  let yesterdayReady = true;
+  let todayReady = true;
+  for (const item of known) {
+    const gains = networkGains(item, dayBefore, yesterday);
+    if (typeof gains.yesterday !== "number") yesterdayReady = false;
+    else yesterdayGain += gains.yesterday;
+    if (typeof gains.today !== "number") todayReady = false;
+    else todayGain += gains.today;
+  }
+  return {
+    yesterday: yesterdayReady ? yesterdayGain : null,
+    today: todayReady ? todayGain : null,
+  };
+}
+
+function paintGains(element, gains, hideWhenEmpty) {
+  const parts = [];
+  if (gains && typeof gains.yesterday === "number") parts.push(["вчера", gains.yesterday]);
+  if (gains && typeof gains.today === "number") parts.push(["сегодня", gains.today]);
+  if (!parts.length) {
+    element.replaceChildren();
+    element.removeAttribute("title");
+    element.removeAttribute("aria-label");
+    if (hideWhenEmpty) element.hidden = true;
     return;
   }
-  if (delta > 0) {
-    element.classList.add("up");
-    element.textContent = `+${format.format(delta)} за сутки`;
-    return;
+  const today = parts.find(([label]) => label === "сегодня");
+  const yesterday = parts.find(([label]) => label === "вчера");
+  const fragment = document.createDocumentFragment();
+  const appendSign = (delta) => {
+    const sign = document.createElement("span");
+    if (delta > 0) sign.className = "up";
+    else if (delta < 0) sign.className = "down";
+    sign.textContent = signedChange(delta);
+    fragment.append(sign);
+  };
+  if (today) appendSign(today[1]);
+  if (yesterday) {
+    fragment.append(today ? " (вчера " : "вчера ");
+    appendSign(yesterday[1]);
+    if (today) fragment.append(")");
   }
-  if (delta < 0) {
-    element.classList.add("down");
-    element.textContent = `−${format.format(Math.abs(delta))} за сутки`;
-    return;
-  }
-  element.textContent = "0 за сутки";
+  element.hidden = false;
+  element.replaceChildren(fragment);
+  const hint = [today, yesterday]
+    .filter(Boolean)
+    .map(([label, delta]) => `${label} ${signedChange(delta)}`)
+    .join(" · ");
+  element.title = hint;
+  element.setAttribute("aria-label", hint);
 }
 
 const PERIODS = ["week", "month", "all"];
@@ -344,8 +425,11 @@ const periodBar = document.getElementById("periods");
 const periodButtons = [...periodBar.querySelectorAll(".period")];
 const forecastEl = document.getElementById("forecast");
 const updatedEl = document.getElementById("updated");
+const totalChangeEl = document.getElementById("total-change");
 let latest = null;
 let generatedAt = "";
+let yesterdayDate = "";
+let dayBeforeDate = "";
 
 function plural(value, one, few, many) {
   const abs = Math.abs(value) % 100;
@@ -550,15 +634,17 @@ function paintBest(card, network) {
 function paintCard(network) {
   const card = grid.querySelector(`[data-id="${network.id}"]`);
   if (!card) return;
+  const gains = networkGains(network, dayBeforeDate, yesterdayDate);
   paintNumber(card.querySelector(".count"), network.count, network.id);
-  paintDelta(card.querySelector(".delta"), network.delta);
+  paintGains(card.querySelector(".delta"), gains, false);
   paintReach(card, network);
   paintBest(card, network);
 
+  const trendDelta = typeof gains.today === "number" ? gains.today : network.delta;
   card.classList.remove("trend-up", "trend-down", "trend-neutral");
   let trend = "neutral";
-  if (network.delta > 0) trend = "up";
-  else if (network.delta < 0) trend = "down";
+  if (trendDelta > 0) trend = "up";
+  else if (trendDelta < 0) trend = "down";
   card.classList.add(`trend-${trend}`);
 
   const spark = card.querySelector(".spark");
@@ -582,12 +668,16 @@ function paintCard(network) {
 
 function apply(data) {
   latest = data;
+  const todayDate = yektToday();
+  yesterdayDate = shiftCalendarDay(todayDate, -1);
+  dayBeforeDate = shiftCalendarDay(todayDate, -2);
   generatedAt = typeof data.generated_at === "string" ? data.generated_at : "";
   paintUpdated();
   const networks = data.networks || [];
   const known = networks.filter((item) => item.count != null);
   const total = known.reduce((sum, item) => sum + item.count, 0);
   paintNumber(totalEl, known.length ? total : null, "total");
+  paintGains(totalChangeEl, known.length ? totalGains(known, dayBeforeDate, yesterdayDate) : null, true);
   paintForecast(known.length ? forecastText(known, total) : "");
   for (const network of networks) paintCard(network);
 }
