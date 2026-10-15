@@ -724,3 +724,61 @@ mountCards();
 refresh();
 setInterval(refresh, 20000);
 setInterval(paintUpdated, 30000);
+
+const VISIT_BADGE_SRC = "https://hits.sh/mantool78-png.github.io.svg?style=flat-square&label=%D0%BF%D1%80%D0%BE%D1%81%D0%BC%D0%BE%D1%82%D1%80%D1%8B&labelColor=16181c&color=22252b";
+const VISIT_BADGE_TIMEOUT_MS = 3000;
+
+function mountVisitBadge() {
+  const screen = document.querySelector(".screen");
+  if (!screen || screen.querySelector(".visit-counter")) return;
+  const footer = document.createElement("footer");
+  footer.className = "visit-counter";
+  footer.hidden = true;
+  const img = document.createElement("img");
+  img.className = "visit-badge";
+  img.alt = "Просмотры страницы";
+  img.height = 20;
+  img.decoding = "async";
+  img.referrerPolicy = "no-referrer";
+  img.setAttribute("fetchpriority", "low");
+  let settled = false;
+  function drop() {
+    if (settled) return;
+    settled = true;
+    window.clearTimeout(timer);
+    img.onload = null;
+    img.onerror = null;
+    img.removeAttribute("src");
+    footer.remove();
+  }
+  function show() {
+    if (settled) return;
+    window.clearTimeout(timer);
+    if (!img.naturalWidth) {
+      drop();
+      return;
+    }
+    settled = true;
+    footer.hidden = false;
+  }
+  const timer = window.setTimeout(drop, VISIT_BADGE_TIMEOUT_MS);
+  img.onload = show;
+  img.onerror = drop;
+  footer.append(img);
+  screen.append(footer);
+  img.src = VISIT_BADGE_SRC;
+}
+
+function scheduleVisitBadge() {
+  const run = () => {
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(() => mountVisitBadge(), { timeout: 1000 });
+    } else {
+      window.setTimeout(mountVisitBadge, 0);
+    }
+  };
+  if (document.readyState === "complete") run();
+  else window.addEventListener("load", run, { once: true });
+}
+
+scheduleVisitBadge();
