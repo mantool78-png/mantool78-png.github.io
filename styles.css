@@ -245,6 +245,30 @@ body {
   gap: 12px;
 }
 
+.visit-counter {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 22px;
+}
+
+.visit-counter[hidden] {
+  display: none !important;
+}
+
+.visit-badge {
+  display: block;
+  height: 20px;
+  width: auto;
+  border-radius: 4px;
+  opacity: 0.72;
+}
+
+@media (hover: hover) {
+  .visit-badge:hover {
+    opacity: 1;
+  }
+}
+
 .card-link {
   display: flex;
   flex: 1 1 auto;
@@ -531,7 +555,7 @@ body {
     position: fixed;
     inset: 0;
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
     box-sizing: border-box;
     width: auto;
     height: auto;
@@ -671,6 +695,15 @@ body {
     width: 6px;
     height: 6px;
     margin-right: 4px;
+  }
+
+  .visit-counter {
+    margin-top: 6px;
+  }
+
+  .visit-badge {
+    height: 16px;
+    opacity: 0.8;
   }
 }
 
