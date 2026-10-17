@@ -208,12 +208,12 @@
       "dzen": 160
     },
     "2026-10-17": {
-      "youtube": 1700,
+      "youtube": 1710,
       "telegram": 6620,
       "tiktok": 498,
       "max": 512,
       "vk": 12296,
-      "dzen": 163
+      "dzen": 164
     }
   },
   "insights": {
@@ -227,7 +227,7 @@
       }
     },
     "vk": {
-      "reach": 958,
+      "reach": 894,
       "best_post": {
         "url": "https://vk.ru/wall-225676956_10081",
         "views": 2629,
