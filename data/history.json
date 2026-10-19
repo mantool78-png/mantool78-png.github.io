@@ -225,8 +225,8 @@
     },
     "2026-10-19": {
       "youtube": 1840,
-      "telegram": 6619,
-      "tiktok": 524,
+      "telegram": 6618,
+      "tiktok": 525,
       "max": 514,
       "vk": 12351,
       "dzen": 164
@@ -234,7 +234,7 @@
   },
   "insights": {
     "telegram": {
-      "reach": 2185,
+      "reach": 2189,
       "best_post": {
         "url": "https://t.me/ACROTIM/4603",
         "views": 3750,
@@ -243,10 +243,10 @@
       }
     },
     "vk": {
-      "reach": 851,
+      "reach": 798,
       "best_post": {
         "url": "https://vk.ru/wall-225676956_10150",
-        "views": 1971,
+        "views": 1972,
         "title": "Финал комбинированного упражнения на юниорском Первенстве мира: британская женская тройка (Gemma, Lexie, Sophie) — кадр, к которому хочется…",
         "date": "2026-10-13"
       }
