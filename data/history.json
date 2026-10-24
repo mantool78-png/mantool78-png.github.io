@@ -267,14 +267,14 @@
       "tiktok": 587,
       "youtube": 1880,
       "telegram": 6624,
-      "max": 549,
+      "max": 550,
       "vk": 12528,
       "dzen": 173
     }
   },
   "insights": {
     "telegram": {
-      "reach": 2023,
+      "reach": 2027,
       "best_post": {
         "url": "https://t.me/ACROTIM/4612",
         "views": 2440,
@@ -283,7 +283,7 @@
       }
     },
     "vk": {
-      "reach": 611,
+      "reach": 612,
       "best_post": {
         "url": "https://vk.ru/wall-225676956_10307",
         "views": 2222,
