@@ -175,7 +175,7 @@
           "count": 6638
         }
       ],
-      "reach": 1646,
+      "reach": 1614,
       "best_post": {
         "url": "https://t.me/ACROTIM/4644",
         "views": 2760,
@@ -534,7 +534,7 @@
           "count": 12797
         }
       ],
-      "reach": 566,
+      "reach": 573,
       "best_post": {
         "url": "https://vk.ru/wall-225676956_10436",
         "views": 2397,
@@ -896,8 +896,8 @@
     },
     {
       "id": "max",
-      "count": 573,
-      "delta": 9,
+      "count": 572,
+      "delta": 8,
       "series": [
         553,
         558,
@@ -905,7 +905,7 @@
         562,
         564,
         564,
-        573
+        572
       ],
       "history": [
         {
@@ -1062,10 +1062,10 @@
         },
         {
           "date": "2026-10-30",
-          "count": 573
+          "count": 572
         }
       ]
     }
   ],
-  "generated_at": "2026-10-30T17:01:54+05:00"
+  "generated_at": "2026-10-30T17:17:11+05:00"
 }
