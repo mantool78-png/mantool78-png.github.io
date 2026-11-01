@@ -334,6 +334,14 @@
       "max": 584,
       "vk": 12963,
       "dzen": 179
+    },
+    "2026-11-02": {
+      "youtube": 1960,
+      "telegram": 6648,
+      "tiktok": 721,
+      "max": 585,
+      "vk": 12964,
+      "dzen": 179
     }
   },
   "insights": {
@@ -347,7 +355,7 @@
       }
     },
     "vk": {
-      "reach": 779,
+      "reach": 780,
       "best_post": {
         "url": "https://vk.ru/wall-225676956_10436",
         "views": 2567,
