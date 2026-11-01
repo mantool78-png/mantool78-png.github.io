@@ -330,9 +330,9 @@
     "2026-11-01": {
       "youtube": 1950,
       "telegram": 6646,
-      "tiktok": 715,
+      "tiktok": 714,
       "max": 584,
-      "vk": 12929,
+      "vk": 12930,
       "dzen": 178
     }
   },
@@ -347,7 +347,7 @@
       }
     },
     "vk": {
-      "reach": 729,
+      "reach": 732,
       "best_post": {
         "url": "https://vk.ru/wall-225676956_10436",
         "views": 2538,
