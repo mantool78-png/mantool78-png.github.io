@@ -2,8 +2,8 @@
   "networks": [
     {
       "id": "telegram",
-      "count": 6628,
-      "delta": 4,
+      "count": 6627,
+      "delta": 3,
       "series": [
         6626,
         6626,
@@ -11,7 +11,7 @@
         6623,
         6623,
         6624,
-        6628
+        6627
       ],
       "history": [
         {
@@ -276,10 +276,10 @@
         },
         {
           "date": "2026-11-25",
-          "count": 6628
+          "count": 6627
         }
       ],
-      "reach": 1896,
+      "reach": 1907,
       "best_post": {
         "url": "https://t.me/ACROTIM/4784",
         "views": 2640,
@@ -846,7 +846,7 @@
           "count": 13837
         }
       ],
-      "reach": 1055,
+      "reach": 1059,
       "best_post": {
         "url": "https://vk.ru/wall-225676956_11095",
         "views": 2082,
@@ -1691,5 +1691,5 @@
       ]
     }
   ],
-  "generated_at": "2026-11-25T11:54:51+05:00"
+  "generated_at": "2026-11-25T12:10:05+05:00"
 }
