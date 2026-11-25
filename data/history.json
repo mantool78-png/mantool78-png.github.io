@@ -522,7 +522,7 @@
     "2026-11-25": {
       "tiktok": 922,
       "youtube": 2420,
-      "telegram": 6624,
+      "telegram": 6625,
       "max": 630,
       "vk": 13831,
       "dzen": 184
@@ -530,7 +530,7 @@
   },
   "insights": {
     "telegram": {
-      "reach": 1997,
+      "reach": 1999,
       "best_post": {
         "url": "https://t.me/ACROTIM/4781",
         "views": 2620,
